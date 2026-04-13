@@ -1,9 +1,6 @@
 This folder is for holding your original assignments that you are using as a reference. 
 Put the code in this folder, but DO NOT modify it directly! 
 
-
-Put the code in this folder, but DO NOT modify it directly!
-
 class AdoptionCenter:
     def __init__(self):
         """
@@ -820,21 +817,3 @@ def find_red_shift(image1, image2):
     shift = (red2 - red1) % 256
 
     return shift
-def main():
-    """
-    Small program to demonstrate shifting red. The first one has very little red, thus very little shift is noticed.
-    The second image has lots of red, so a large shift is noticed.
-
-    Returns:
-
-    """
-    i = ImageConverter("images/map.png")
-    i.shift_red(3)
-    i.save_img("images/map_2.png")
-
-    i = ImageConverter("images/RF9152.png")
-    i.shift_red(-200)
-    i.save_img("images/RF9152_2.png")
-
-if __name__ == "__main__":
-    main()
