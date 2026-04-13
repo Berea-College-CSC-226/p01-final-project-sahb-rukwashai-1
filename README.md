@@ -2,10 +2,11 @@
 
 ## Instructions
 
-Exclamation Marks ❗️indicate action items; you should remove these emoji as you complete/update the items which 
+❗️Exclamation Marks ❗️indicate action items; you should remove these emoji as you complete/update the items which 
   they accompany. (This means that your final README should have no ❗️in it!)
 
 **Author(s)**: Bhushan Sah 
+**Author(s)**: Daniel Rukwasha
 
 **Google Doc Link**: https://docs.google.com/document/d/1lKuOB9pPnH6yuEsixRnpE7bPGq9S8JdDnZPzu4O5a8s/edit?usp=sharing
 **GitHub Link**: https://github.com/Berea-College-CSC-226/p01-final-project-sahb-rukwashai-1
@@ -40,7 +41,7 @@ into your own, following the process we've discussed in previous assignments, th
 
 ```
     Branch 1 starting name: sahb
-    Branch 2 starting name: _____________
+    Branch 2 starting name: Rukwashai
 ```
 
 ### References 
