@@ -24,8 +24,191 @@
    T11 (The Legend of Tuna)`
 
 **CRC Card(s)**:
-  - [CRC Cards](image/CRC_Card.png)
+    # CRC Cards
 
+---
+
+  ## Class name: GameObject
+  
+  | Class Attributes: | Class Collaborations (other classes): |
+  |---|---|
+  | x, y (position coordinates) | |
+  | size (for collision detection) | |
+  
+  | Class Methods: | Class Collaborations (other classes): |
+  |---|---|
+  | render(): draw itself on screen | Turtle |
+  | distance_to(other): calculate distance to another object | GameObject |
+  | collides_with(other): check collision with another object | GameObject |
+  
+  ---
+  
+  ## Class name: Tower (inherits GameObject)
+  
+  | Class Attributes: | Class Collaborations (other classes): |
+  |---|---|
+  | range (how far it can shoot) | |
+  | damage (how much damage per shot) | |
+  | fire_rate (time between shots) | |
+  | cost (price to place the tower) | |
+  | target (the enemy currently aimed at) | Enemy |
+  
+  | Class Methods: | Class Collaborations (other classes): |
+  |---|---|
+  | find_target(enemies): find nearest enemy in range | Enemy |
+  | fire(): create a projectile aimed at target | Projectile |
+  | can_fire(): check if enough time has passed to shoot again | |
+  | render(): draw the tower on the map | Turtle |
+  
+  ---
+  
+  ## Class name: ArrowTower (inherits Tower)
+  
+  | Class Attributes: | Class Collaborations (other classes): |
+  |---|---|
+  | damage = 25 | |
+  | range = 150 | |
+  | fire_rate = 1.0 | |
+  | cost = 50 | |
+  
+  | Class Methods: | Class Collaborations (other classes): |
+  |---|---|
+  | fire(): deal single-target damage via projectile | Projectile, Enemy |
+  
+  ---
+  
+  ## Class name: BombTower (inherits Tower)
+  
+  | Class Attributes: | Class Collaborations (other classes): |
+  |---|---|
+  | damage = 40 | |
+  | range = 100 | |
+  | fire_rate = 2.0 | |
+  | cost = 100 | |
+  | blast_radius (area of explosion) | |
+  
+  | Class Methods: | Class Collaborations (other classes): |
+  |---|---|
+  | fire(): deal area damage to enemies near impact | Projectile, Enemy |
+  
+  ---
+  
+  ## Class name: FreezeTower (inherits Tower)
+  
+  | Class Attributes: | Class Collaborations (other classes): |
+  |---|---|
+  | range = 120 | |
+  | slow_amount (how much to reduce enemy speed) | |
+  | cost = 75 | |
+  
+  | Class Methods: | Class Collaborations (other classes): |
+  |---|---|
+  | apply_slow(enemies): slow all enemies within range | Enemy |
+  
+  ---
+  
+  ## Class name: Enemy (inherits GameObject)
+  
+  | Class Attributes: | Class Collaborations (other classes): |
+  |---|---|
+  | health (current hit points) | |
+  | speed (how fast it moves per frame) | |
+  | reward (money given when destroyed) | |
+  | current_waypoint (index of next waypoint to reach) | |
+  
+  | Class Methods: | Class Collaborations (other classes): |
+  |---|---|
+  | move(): step toward the next waypoint | |
+  | take_damage(amount): reduce health by amount | |
+  | is_dead(): check if health is zero or below | |
+  | reached_end(): check if past the last waypoint | |
+  | render(): draw itself and its health bar | Turtle |
+  
+  ---
+  
+  ## Class name: FastEnemy (inherits Enemy)
+  
+  | Class Attributes: | Class Collaborations (other classes): |
+  |---|---|
+  | health = 50 (low) | |
+  | speed = 4 (high) | |
+  | reward = 10 | |
+  
+  | Class Methods: | Class Collaborations (other classes): |
+  |---|---|
+  | inherits all methods from Enemy | |
+  
+  ---
+  
+  ## Class name: TankEnemy (inherits Enemy)
+  
+  | Class Attributes: | Class Collaborations (other classes): |
+  |---|---|
+  | health = 200 (high) | |
+  | speed = 1 (low) | |
+  | reward = 30 | |
+  
+  | Class Methods: | Class Collaborations (other classes): |
+  |---|---|
+  | inherits all methods from Enemy | |
+  
+  ---
+  
+  ## Class name: Projectile (inherits GameObject)
+  
+  | Class Attributes: | Class Collaborations (other classes): |
+  |---|---|
+  | damage (how much damage on hit) | |
+  | speed (how fast it travels) | |
+  | target (reference to the enemy it tracks) | Enemy |
+  
+  | Class Methods: | Class Collaborations (other classes): |
+  |---|---|
+  | move(): step toward the target's current position | Enemy |
+  | has_hit(): check if close enough to count as a hit | Enemy |
+  | apply_damage(): deal damage to the target on hit | Enemy |
+  | render(): draw itself on screen | Turtle |
+  
+  ---
+  
+  ## Class name: Wave
+  
+  | Class Attributes: | Class Collaborations (other classes): |
+  |---|---|
+  | enemy_list (sequence of enemy types and spawn delays) | |
+  | wave_number (which wave this is) | |
+  | spawn_index (tracks which enemy to spawn next) | |
+  
+  | Class Methods: | Class Collaborations (other classes): |
+  |---|---|
+  | spawn_next(): create the next enemy in the sequence | Enemy, FastEnemy, TankEnemy |
+  | is_complete(): check if all enemies have been spawned | |
+  | reset(): reset the wave for replay | |
+  
+  ---
+  
+  ## Class name: Game
+  
+  | Class Attributes: | Class Collaborations (other classes): |
+  |---|---|
+  | towers (list of all placed towers) | Tower |
+  | enemies (list of all active enemies) | Enemy |
+  | projectiles (list of all active projectiles) | Projectile |
+  | waves (list of all waves) | Wave |
+  | money (player's current money) | |
+  | lives (player's remaining lives) | |
+  | score (player's current score) | |
+  
+  | Class Methods: | Class Collaborations (other classes): |
+  |---|---|
+  | setup(): initialize window, draw map, define path | Turtle, Tkinter |
+  | handle_click(x, y): place a tower where the player clicks | Tower |
+  | game_loop(): run one frame of the game | Tower, Enemy, Projectile |
+  | start_wave(): begin spawning the next wave | Wave |
+  | check_game_over(): check win or lose conditions | |
+  | update_display(): refresh the side panel stats | Tkinter |
+
+  
   - **Branches**: This project will **require** effective use of git. 
 
  Each partner should create a branch at the beginning of the project, and stay on this branch (or branches of their 
