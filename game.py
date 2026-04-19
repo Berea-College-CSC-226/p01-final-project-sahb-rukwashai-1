@@ -10,6 +10,9 @@ import math
 from path_data import WAYPOINTS, SPAWN_POINT, EXIT_POINT, PATH_WIDTH, GAME_AREA_WIDTH
 from game_object import GameObject
 from towers import ArrowTower, BombTower, FreezeTower, TOWER_TYPES
+from enemies import Enemy
+from waves import Wave, WAVE_DATA
+from projectiles import Projectile, BombProjectile
 
 
 SCREEN_WIDTH = 1000
@@ -37,7 +40,7 @@ SELECTED_BORDER = (255, 221, 87)
 
 
 # ---------------------------------------------------------------------------
-# PATH HELPERS (used by placement validation)
+# PATH HELPERS
 # ---------------------------------------------------------------------------
 def _point_segment_distance(px, py, ax, ay, bx, by):
     """
@@ -80,8 +83,9 @@ def is_on_path(x, y):
 
 class Game:
     """
-    Main game class. Handles window setup, map rendering,
-    side panel, tower selection and placement, and the game loop.
+    Main game class. Handles window setup, map rendering, side panel,
+    tower placement, wave spawning, enemy movement, tower targeting,
+    projectile firing, and win/lose conditions.
     """
 
     def __init__(self):
@@ -99,19 +103,25 @@ class Game:
         self.lives = 20
         self.score = 0
         self.current_wave = 0
-        self.total_waves = 5
+        self.total_waves = len(WAVE_DATA)
+        self.game_over = False
+        self.game_won = False
+        self.wave_active = False
 
         # Lists to track game objects
         self.towers = []
         self.enemies = []
         self.projectiles = []
 
+        # Current wave object
+        self.wave = None
+
         # Tower selection state
         self.selected_tower_name = None
         self.selected_tower_class = None
 
-        # Status message for the side panel
-        self.status_message = "Select a tower to place."
+        # Status message
+        self.status_message = "Press SPACE to start wave 1."
 
         # Path data
         self.waypoints = WAYPOINTS
@@ -123,14 +133,14 @@ class Game:
         self.font_medium = pygame.font.SysFont("Arial", 20)
         self.font_small = pygame.font.SysFont("Arial", 16)
         self.font_tiny = pygame.font.SysFont("Arial", 13)
+        self.font_huge = pygame.font.SysFont("Arial", 48, bold=True)
 
-        # Build tower button rects for click detection
+        # Build tower button rects
         self._build_tower_buttons()
 
     def _build_tower_buttons(self):
         """
         Create clickable button rectangles for each tower type.
-        Called once during init.
         """
         self.tower_buttons = []
         x = GAME_AREA_WIDTH + 15
@@ -154,9 +164,11 @@ class Game:
             })
             y += btn_h + 10
 
-        # Cancel button rect
         self.cancel_rect = pygame.Rect(x, y + 5, btn_w, 30)
 
+    # -----------------------------------------------------------------------
+    # MAP DRAWING (Issue I.B)
+    # -----------------------------------------------------------------------
     def draw_map(self):
         """
         Draw the game background and the enemy path.
@@ -164,51 +176,46 @@ class Game:
         game_area = pygame.Rect(0, 0, GAME_AREA_WIDTH, SCREEN_HEIGHT)
         pygame.draw.rect(self.screen, GRASS_GREEN, game_area)
 
-        # Grass texture
         for x in range(0, GAME_AREA_WIDTH, 40):
             for y in range(0, SCREEN_HEIGHT, 40):
                 if (x + y) % 80 == 0:
                     patch = pygame.Rect(x, y, 20, 20)
                     pygame.draw.rect(self.screen, DARK_GREEN, patch)
 
-        # Path border
         if len(self.waypoints) > 1:
             pygame.draw.lines(self.screen, PATH_BORDER_COLOR, False,
                               self.waypoints, PATH_WIDTH + 6)
 
-        # Main path
         if len(self.waypoints) > 1:
             pygame.draw.lines(self.screen, PATH_COLOR, False,
                               self.waypoints, PATH_WIDTH)
 
-        # Smooth corners
         for wp in self.waypoints:
             pygame.draw.circle(self.screen, PATH_COLOR, wp, PATH_WIDTH // 2)
             pygame.draw.circle(self.screen, PATH_BORDER_COLOR, wp,
                                PATH_WIDTH // 2 + 3, 3)
 
-        # Spawn marker
         pygame.draw.circle(self.screen, RED,
                            (self.waypoints[1][0], self.waypoints[1][1]), 10)
         spawn_label = self.font_small.render("SPAWN", True, WHITE)
         self.screen.blit(spawn_label,
                          (self.waypoints[1][0] - 25, self.waypoints[1][1] - 25))
 
-        # Exit marker
         exit_wp = self.waypoints[-2]
         pygame.draw.circle(self.screen, GOLD, (exit_wp[0], exit_wp[1]), 10)
         exit_label = self.font_small.render("EXIT", True, WHITE)
         self.screen.blit(exit_label, (exit_wp[0] - 15, exit_wp[1] - 25))
 
+    # -----------------------------------------------------------------------
+    # DRAW GAME OBJECTS
+    # -----------------------------------------------------------------------
     def draw_towers(self):
         """
-        Draw all placed towers on the map.
-        If a tower type is selected, show range circles on hover.
+        Draw all placed towers and range preview on hover.
         """
         for tower in self.towers:
             tower.render(self.screen)
 
-        # Show range preview where the mouse is if a tower is selected
         if self.selected_tower_class is not None:
             mx, my = pygame.mouse.get_pos()
             if mx < GAME_AREA_WIDTH:
@@ -227,11 +234,27 @@ class Game:
                 self.screen.blit(range_surface,
                                  (mx - cls.tower_range, my - cls.tower_range))
 
+    def draw_enemies(self):
+        """
+        Draw all active enemies on the map.
+        """
+        for enemy in self.enemies:
+            enemy.render(self.screen)
+
+    def draw_projectiles(self):
+        """
+        Draw all active projectiles on the map.
+        """
+        for proj in self.projectiles:
+            proj.render(self.screen)
+
+    # -----------------------------------------------------------------------
+    # SIDE PANEL (Issue I.D)
+    # -----------------------------------------------------------------------
     def draw_side_panel(self):
         """
-        Draw the side panel with player stats, tower buttons, and status.
+        Draw the side panel with stats, tower buttons, and status message.
         """
-        # Panel background
         panel_rect = pygame.Rect(GAME_AREA_WIDTH, 0, SIDE_PANEL_WIDTH, SCREEN_HEIGHT)
         pygame.draw.rect(self.screen, PANEL_BG, panel_rect)
         pygame.draw.line(self.screen, PANEL_BORDER, (GAME_AREA_WIDTH, 0),
@@ -240,17 +263,14 @@ class Game:
         x = GAME_AREA_WIDTH + 15
         y = 20
 
-        # Title
         title = self.font_large.render("TOWER DEFENSE", True, GOLD)
         self.screen.blit(title, (x, y))
         y += 45
 
-        # Divider
         pygame.draw.line(self.screen, PANEL_BORDER, (x, y),
                          (SCREEN_WIDTH - 15, y), 2)
         y += 15
 
-        # Stats
         stats_label = self.font_medium.render("--- STATS ---", True, LIGHT_GRAY)
         self.screen.blit(stats_label, (x + 30, y))
         y += 30
@@ -272,17 +292,14 @@ class Game:
         self.screen.blit(wave_text, (x, y))
         y += 40
 
-        # Divider
         pygame.draw.line(self.screen, PANEL_BORDER, (x, y),
                          (SCREEN_WIDTH - 15, y), 2)
         y += 15
 
-        # Tower header
         tower_label = self.font_medium.render("--- TOWERS ---", True, LIGHT_GRAY)
         self.screen.blit(tower_label, (x + 25, y))
         y += 35
 
-        # Tower buttons
         mouse_pos = pygame.mouse.get_pos()
 
         for btn in self.tower_buttons:
@@ -290,21 +307,18 @@ class Game:
             is_selected = (btn["name"] == self.selected_tower_name)
             is_hovered = rect.collidepoint(mouse_pos)
 
-            # Button color (lighten on hover)
             bg_color = btn["color"]
             if is_hovered:
                 bg_color = tuple(min(c + 30, 255) for c in bg_color)
 
             pygame.draw.rect(self.screen, bg_color, rect, border_radius=5)
 
-            # Border (gold if selected, white otherwise)
             if is_selected:
                 pygame.draw.rect(self.screen, SELECTED_BORDER, rect, 3,
                                  border_radius=5)
             else:
                 pygame.draw.rect(self.screen, WHITE, rect, 2, border_radius=5)
 
-            # Button text
             name_text = self.font_small.render(
                 f"{btn['name']} Tower", True, WHITE)
             cost_text = self.font_small.render(
@@ -312,7 +326,6 @@ class Game:
             self.screen.blit(name_text, (rect.x + 10, rect.y + 8))
             self.screen.blit(cost_text, (rect.x + 10, rect.y + 28))
 
-        # Cancel button
         cancel_hovered = self.cancel_rect.collidepoint(mouse_pos)
         cancel_color = (100, 100, 100) if cancel_hovered else (70, 70, 70)
         pygame.draw.rect(self.screen, cancel_color, self.cancel_rect,
@@ -321,19 +334,16 @@ class Game:
         cancel_text_rect = cancel_text.get_rect(center=self.cancel_rect.center)
         self.screen.blit(cancel_text, cancel_text_rect)
 
-        # Divider
         div_y = self.cancel_rect.bottom + 15
         pygame.draw.line(self.screen, PANEL_BORDER, (x, div_y),
                          (SCREEN_WIDTH - 15, div_y), 2)
 
-        # Status message
         status_y = div_y + 10
         for line in self.status_message.split("\n"):
             status_text = self.font_tiny.render(line, True, SELECTED_BORDER)
             self.screen.blit(status_text, (x, status_y))
             status_y += 18
 
-        # Controls
         controls_y = SCREEN_HEIGHT - 100
         pygame.draw.line(self.screen, PANEL_BORDER, (x, controls_y - 10),
                          (SCREEN_WIDTH - 15, controls_y - 10), 2)
@@ -352,6 +362,36 @@ class Game:
             ctrl_text = self.font_tiny.render(line, True, GRAY)
             self.screen.blit(ctrl_text, (x, controls_y))
             controls_y += 16
+
+    # -----------------------------------------------------------------------
+    # GAME OVER SCREEN (Issue VI.C)
+    # -----------------------------------------------------------------------
+    def draw_game_over(self):
+        """
+        Draw a win or lose overlay on the game area.
+        """
+        overlay = pygame.Surface((GAME_AREA_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 150))
+        self.screen.blit(overlay, (0, 0))
+
+        if self.game_won:
+            msg = "YOU WIN!"
+            color = GOLD
+        else:
+            msg = "GAME OVER"
+            color = RED
+
+        text = self.font_huge.render(msg, True, color)
+        text_rect = text.get_rect(center=(GAME_AREA_WIDTH // 2, SCREEN_HEIGHT // 2 - 30))
+        self.screen.blit(text, text_rect)
+
+        score_text = self.font_large.render(f"Final Score: {self.score}", True, WHITE)
+        score_rect = score_text.get_rect(center=(GAME_AREA_WIDTH // 2, SCREEN_HEIGHT // 2 + 30))
+        self.screen.blit(score_text, score_rect)
+
+        restart_text = self.font_medium.render("Press Q to quit", True, GRAY)
+        restart_rect = restart_text.get_rect(center=(GAME_AREA_WIDTH // 2, SCREEN_HEIGHT // 2 + 80))
+        self.screen.blit(restart_text, restart_rect)
 
     # -----------------------------------------------------------------------
     # TOWER SELECTION (Issue II.A)
@@ -392,22 +432,18 @@ class Game:
         :param cls: tower class to place
         :return: tuple (bool valid, string reason)
         """
-        # Check money
         if self.money < cls.cost:
             return False, f"Not enough money! Need ${cls.cost}, have ${self.money}."
 
-        # Check path collision
         if is_on_path(x, y):
             return False, "Can't place on the path!"
 
-        # Check existing tower collision
         temp = GameObject(x, y, size=18)
         for t in self.towers:
             tower_obj = GameObject(t.x, t.y, size=18)
             if temp.collides_with(tower_obj):
                 return False, "A tower is already there!"
 
-        # Check map bounds
         if not (20 < x < GAME_AREA_WIDTH - 20 and 20 < y < SCREEN_HEIGHT - 20):
             return False, "That's outside the map!"
 
@@ -430,20 +466,96 @@ class Game:
             self.status_message = reason
             return
 
-        # Place the tower
         tower = cls(x, y)
         self.towers.append(tower)
-
-        # Subtract cost
         self.money -= cls.cost
 
         self.status_message = (f"{cls.tower_name} Tower placed!\n"
                                f"${cls.cost} spent. ${self.money} remaining.")
 
-        # Check if player can still afford this tower type
         if self.money < cls.cost:
             self.status_message += (f"\nCan't afford another {cls.tower_name}.")
             self._deselect_tower()
+
+    # -----------------------------------------------------------------------
+    # WAVE START (Issue III.B)
+    # -----------------------------------------------------------------------
+    def _start_wave(self):
+        """
+        Start the next wave of enemies.
+        """
+        if self.wave_active:
+            self.status_message = "Wave already in progress!"
+            return
+
+        if self.current_wave >= self.total_waves:
+            self.status_message = "All waves completed!"
+            return
+
+        self.wave = Wave(self.current_wave, WAYPOINTS)
+        self.current_wave += 1
+        self.wave_active = True
+        self.status_message = f"Wave {self.current_wave} started!"
+
+    # -----------------------------------------------------------------------
+    # TOWER TARGETING AND FIRING (Issue IV)
+    # -----------------------------------------------------------------------
+    def _update_towers(self, dt):
+        """
+        For each tower: find a target, check cooldown, and fire if ready.
+        Covers Issues IV.A, IV.B, IV.C.
+
+        :param dt: time elapsed since last frame in seconds
+        """
+        for tower in self.towers:
+            # Update the fire cooldown timer
+            tower.update_timer(dt)
+
+            # FreezeTower applies slow instead of firing projectiles
+            if isinstance(tower, FreezeTower):
+                tower.apply_slow(self.enemies)
+                continue
+
+            # IV.A and IV.B: Find the closest enemy within range
+            target = tower.find_target(self.enemies)
+
+            if target is None:
+                continue
+
+            # IV.C: If cooldown is ready, create a projectile
+            if tower.can_fire():
+                if isinstance(tower, BombTower):
+                    proj = BombProjectile(
+                        tower.x, tower.y,
+                        target,
+                        tower.damage,
+                        tower.blast_radius,
+                        self.enemies,
+                        speed=6,
+                        color=(255, 100, 50),
+                    )
+                else:
+                    proj = Projectile(
+                        tower.x, tower.y,
+                        target,
+                        tower.damage,
+                        speed=8,
+                        color=(255, 255, 100),
+                    )
+
+                self.projectiles.append(proj)
+                tower.reset_timer()
+
+    def _update_projectiles(self):
+        """
+        Move all projectiles and remove dead ones.
+        Covers Issue IV.D.
+        """
+        for proj in self.projectiles:
+            proj.move()
+
+        # Remove dead projectiles (hit target or target gone)
+        self.projectiles = [p for p in self.projectiles if p.alive]
 
     # -----------------------------------------------------------------------
     # CLICK HANDLING (Issue II.B)
@@ -455,24 +567,27 @@ class Game:
         :param mx: mouse x-coordinate
         :param my: mouse y-coordinate
         """
-        # Check tower buttons
+        if self.game_over:
+            return
+
         for btn in self.tower_buttons:
             if btn["rect"].collidepoint(mx, my):
                 self._select_tower(btn["name"])
                 return
 
-        # Check cancel button
         if self.cancel_rect.collidepoint(mx, my):
             self._deselect_tower()
             return
 
-        # Check game area (tower placement)
         if mx < GAME_AREA_WIDTH:
             if self.selected_tower_class is None:
                 self.status_message = "Select a tower first!"
             else:
                 self._try_place_tower(mx, my)
 
+    # -----------------------------------------------------------------------
+    # EVENT HANDLING
+    # -----------------------------------------------------------------------
     def handle_events(self):
         """
         Handle Pygame events: quit, key presses, mouse clicks.
@@ -484,26 +599,100 @@ class Game:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
                     self.running = False
+                if event.key == pygame.K_SPACE and not self.game_over:
+                    self._start_wave()
 
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 self._handle_click(*event.pos)
 
+    # -----------------------------------------------------------------------
+    # UPDATE
+    # -----------------------------------------------------------------------
     def update(self):
         """
-        Update game state each frame.
-        Will be expanded with enemies, projectiles, etc.
+        Update game state each frame: spawn enemies, move them,
+        update towers, move projectiles, check win/lose.
         """
-        pass
+        if self.game_over:
+            return
 
+        dt_ms = self.clock.get_time()
+        dt = dt_ms / 1000.0     # convert to seconds for tower timers
+
+        # Spawn enemies from the current wave
+        if self.wave is not None and not self.wave.is_complete():
+            new_enemy = self.wave.update(dt_ms)
+            if new_enemy is not None:
+                self.enemies.append(new_enemy)
+
+        # Restore enemy speeds before freeze towers reapply
+        for enemy in self.enemies:
+            enemy.speed = enemy.original_speed
+
+        # Update towers: find targets, fire projectiles (Issue IV)
+        self._update_towers(dt)
+
+        # Move all enemies along the path
+        for enemy in self.enemies:
+            enemy.move()
+
+        # Move all projectiles toward targets (Issue IV.D)
+        self._update_projectiles()
+
+        # Check for enemies that reached the exit (Issue V.C)
+        for enemy in self.enemies[:]:
+            if enemy.reached_end:
+                self.lives -= 1
+                self.enemies.remove(enemy)
+
+        # Check for dead enemies (Issue V.B)
+        for enemy in self.enemies[:]:
+            if enemy.is_dead():
+                self.money += enemy.reward
+                self.score += enemy.reward
+                self.enemies.remove(enemy)
+
+        # Check if wave is done
+        if self.wave_active and self.wave is not None:
+            if self.wave.is_complete() and len(self.enemies) == 0:
+                self.wave_active = False
+                if self.current_wave >= self.total_waves:
+                    self.status_message = "All waves cleared! You win!"
+                    self.game_over = True
+                    self.game_won = True
+                else:
+                    self.status_message = (
+                        f"Wave {self.current_wave} cleared!\n"
+                        f"Press SPACE for wave {self.current_wave + 1}.")
+
+        # Check lose condition (Issue VI.A)
+        if self.lives <= 0:
+            self.lives = 0
+            self.game_over = True
+            self.game_won = False
+            self.status_message = "Game Over! You ran out of lives."
+
+    # -----------------------------------------------------------------------
+    # DRAW
+    # -----------------------------------------------------------------------
     def draw(self):
         """
         Draw everything to the screen.
         """
         self.draw_map()
         self.draw_towers()
+        self.draw_enemies()
+        self.draw_projectiles()
         self.draw_side_panel()
+
+        if self.game_over:
+            self.draw_game_over()
+
         pygame.display.flip()
 
+    # -----------------------------------------------------------------------
+    # MAIN LOOP
+    # -----------------------------------------------------------------------
     def run(self):
         """
         Main game loop. Handles events, updates state, and draws each frame.

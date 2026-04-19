@@ -3,7 +3,7 @@
 ## Instructions
 
 ❗️Exclamation Marks ❗️indicate action items; you should remove these emoji as you complete/update the items which 
-  they accompany . (This means that your final README should have no ❗️in it!)
+  they accompany. (This means that your final README should have no ❗️in it!)
 
 **Author(s)**: Bhushan Sah & Daniel Rukwasha
 
