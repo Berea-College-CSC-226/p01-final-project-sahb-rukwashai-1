@@ -231,7 +231,21 @@ and describe how you integrated the ideas or code into your program. This includ
 helped you, AI tools you've used, and any other resources that are not solely your own contribution. Update this 
 section as you go. DO NOT forget about it!
     
-
+- Claude AI -helping write game logic for tower placement, enemy movement, wave spawning,
+  and projectile systems.
+- Pygame documentation (https://www.pygame.org/docs/) - Referenced for drawing functions,
+  event handling, and surface/alpha blending.
+- T11: The Legend of Tuna - Used as reference for Pygame game loop structure, sprite
+  movement, and collision detection patterns.
+- T10: Pet Adoption Center - Used as reference for class inheritance structure.
+- Stack Overflow (https://stackoverflow.com/) - Referenced for point-to-line-segment
+  distance formula used in tower placement validation.
+- GeeksforGeeks (https://www.geeksforgeeks.org/) - Referenced for understanding
+  Euclidean distance calculation and circle-based collision detection.
+- Real Python Pygame tutorial (https://realpython.com/pygame-a-primer/) - Referenced
+  for game loop structure and frame rate management with pygame.time.Clock.
+- Python docs (https://docs.python.org/3/) - Referenced for math module functions
+  (sqrt, atan2) and list comprehension patterns used for filtering enemies and projectiles.
 ---
 
 ## Milestone 2: Code Setup and Issue Queue
@@ -242,7 +256,23 @@ Reflect on what you’ve done so far. How’s it going? Are you feeling behind/a
 What has surprised you so far? Describe your general feelings. Be honest with yourself; this section is for you, not me.
 
 ```
-    **Replace this text with your reflection
+    This project has been going well. We got the core game loop working faster than I expected.
+    Towers place correctly, enemies walk the path, projectiles track and hit targets. Seeing it
+    all come together was satisfying.
+    
+    I think we're in a good spot for the timeline. The main gameplay is done so now it's about
+    testing, cleaning up, and fixing edge cases. The issue queue helped a lot with staying on
+    track and splitting work between us.
+    
+    What surprised me was how much thought went into the small stuff. Tower placement validation
+    and projectile tracking took longer than I assumed they would. Getting the freeze tower to
+    slow enemies without stacking permanently was a fun problem to solve.
+    
+    My biggest concern right now is the test suite. Most of our code is visual so I need to
+    figure out how to test the logic (damage, distance, path collision) without spinning up a
+    Pygame window.
+    
+    Overall feeling good. The game is playable and we've been committing steadily.
 ```
 
 ---
