@@ -139,4 +139,4 @@ class TankEnemy(Enemy):
     max_health = 200
     speed = 1.0
     reward = 30
-    color = (100, 50, 150)
+    color = (100, 50, 150)      # purple
