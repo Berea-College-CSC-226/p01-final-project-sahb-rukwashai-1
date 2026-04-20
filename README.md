@@ -26,188 +26,214 @@
     # CRC Cards
 
 ---
+## Class name: GameObject
 
-  ## Class name: GameObject
-  
-  | Class Attributes: | Class Collaborations (other classes): |
-  |---|---|
-  | x, y (position coordinates) | |
-  | size (for collision detection) | |
-  
-  | Class Methods: | Class Collaborations (other classes): |
-  |---|---|
-  | render(): draw itself on screen | Turtle |
-  | distance_to(other): calculate distance to another object | GameObject |
-  | collides_with(other): check collision with another object | GameObject |
-  
-  ---
-  
-  ## Class name: Tower (inherits GameObject)
-  
-  | Class Attributes: | Class Collaborations (other classes): |
-  |---|---|
-  | range (how far it can shoot) | |
-  | damage (how much damage per shot) | |
-  | fire_rate (time between shots) | |
-  | cost (price to place the tower) | |
-  | target (the enemy currently aimed at) | Enemy |
-  
-  | Class Methods: | Class Collaborations (other classes): |
-  |---|---|
-  | find_target(enemies): find nearest enemy in range | Enemy |
-  | fire(): create a projectile aimed at target | Projectile |
-  | can_fire(): check if enough time has passed to shoot again | |
-  | render(): draw the tower on the map | Turtle |
-  
-  ---
-  
-  ## Class name: ArrowTower (inherits Tower)
-  
-  | Class Attributes: | Class Collaborations (other classes): |
-  |---|---|
-  | damage = 25 | |
-  | range = 150 | |
-  | fire_rate = 1.0 | |
-  | cost = 50 | |
-  
-  | Class Methods: | Class Collaborations (other classes): |
-  |---|---|
-  | fire(): deal single-target damage via projectile | Projectile, Enemy |
-  
-  ---
-  
-  ## Class name: BombTower (inherits Tower)
-  
-  | Class Attributes: | Class Collaborations (other classes): |
-  |---|---|
-  | damage = 40 | |
-  | range = 100 | |
-  | fire_rate = 2.0 | |
-  | cost = 100 | |
-  | blast_radius (area of explosion) | |
-  
-  | Class Methods: | Class Collaborations (other classes): |
-  |---|---|
-  | fire(): deal area damage to enemies near impact | Projectile, Enemy |
-  
-  ---
-  
-  ## Class name: FreezeTower (inherits Tower)
-  
-  | Class Attributes: | Class Collaborations (other classes): |
-  |---|---|
-  | range = 120 | |
-  | slow_amount (how much to reduce enemy speed) | |
-  | cost = 75 | |
-  
-  | Class Methods: | Class Collaborations (other classes): |
-  |---|---|
-  | apply_slow(enemies): slow all enemies within range | Enemy |
-  
-  ---
-  
-  ## Class name: Enemy (inherits GameObject)
-  
-  | Class Attributes: | Class Collaborations (other classes): |
-  |---|---|
-  | health (current hit points) | |
-  | speed (how fast it moves per frame) | |
-  | reward (money given when destroyed) | |
-  | current_waypoint (index of next waypoint to reach) | |
-  
-  | Class Methods: | Class Collaborations (other classes): |
-  |---|---|
-  | move(): step toward the next waypoint | |
-  | take_damage(amount): reduce health by amount | |
-  | is_dead(): check if health is zero or below | |
-  | reached_end(): check if past the last waypoint | |
-  | render(): draw itself and its health bar | Turtle |
-  
-  ---
-  
-  ## Class name: FastEnemy (inherits Enemy)
-  
-  | Class Attributes: | Class Collaborations (other classes): |
-  |---|---|
-  | health = 50 (low) | |
-  | speed = 4 (high) | |
-  | reward = 10 | |
-  
-  | Class Methods: | Class Collaborations (other classes): |
-  |---|---|
-  | inherits all methods from Enemy | |
-  
-  ---
-  
-  ## Class name: TankEnemy (inherits Enemy)
-  
-  | Class Attributes: | Class Collaborations (other classes): |
-  |---|---|
-  | health = 200 (high) | |
-  | speed = 1 (low) | |
-  | reward = 30 | |
-  
-  | Class Methods: | Class Collaborations (other classes): |
-  |---|---|
-  | inherits all methods from Enemy | |
-  
-  ---
-  
-  ## Class name: Projectile (inherits GameObject)
-  
-  | Class Attributes: | Class Collaborations (other classes): |
-  |---|---|
-  | damage (how much damage on hit) | |
-  | speed (how fast it travels) | |
-  | target (reference to the enemy it tracks) | Enemy |
-  
-  | Class Methods: | Class Collaborations (other classes): |
-  |---|---|
-  | move(): step toward the target's current position | Enemy |
-  | has_hit(): check if close enough to count as a hit | Enemy |
-  | apply_damage(): deal damage to the target on hit | Enemy |
-  | render(): draw itself on screen | Turtle |
-  
-  ---
-  
-  ## Class name: Wave
-  
-  | Class Attributes: | Class Collaborations (other classes): |
-  |---|---|
-  | enemy_list (sequence of enemy types and spawn delays) | |
-  | wave_number (which wave this is) | |
-  | spawn_index (tracks which enemy to spawn next) | |
-  
-  | Class Methods: | Class Collaborations (other classes): |
-  |---|---|
-  | spawn_next(): create the next enemy in the sequence | Enemy, FastEnemy, TankEnemy |
-  | is_complete(): check if all enemies have been spawned | |
-  | reset(): reset the wave for replay | |
-  
-  ---
-  
-  ## Class name: Game
-  
-  | Class Attributes: | Class Collaborations (other classes): |
-  |---|---|
-  | towers (list of all placed towers) | Tower |
-  | enemies (list of all active enemies) | Enemy |
-  | projectiles (list of all active projectiles) | Projectile |
-  | waves (list of all waves) | Wave |
-  | money (player's current money) | |
-  | lives (player's remaining lives) | |
-  | score (player's current score) | |
-  
-  | Class Methods: | Class Collaborations (other classes): |
-  |---|---|
-  | setup(): initialize window, draw map, define path | Turtle, Tkinter |
-  | handle_click(x, y): place a tower where the player clicks | Tower |
-  | game_loop(): run one frame of the game | Tower, Enemy, Projectile |
-  | start_wave(): begin spawning the next wave | Wave |
-  | check_game_over(): check win or lose conditions | |
-  | update_display(): refresh the side panel stats | Tkinter |
+| Class Attributes: | Class Collaborations (other classes): |
+|---|---|
+| x, y (position coordinates) | |
+| size (for collision detection) | |
 
-  
+| Class Methods: | Class Collaborations (other classes): |
+|---|---|
+| render(): draw itself on screen | Pygame |
+| distance_to(other): calculate distance to another object | GameObject |
+| collides_with(other): check collision with another object | GameObject |
+
+---
+
+## Class name: Tower (inherits GameObject)
+
+| Class Attributes: | Class Collaborations (other classes): |
+|---|---|
+| tower_range (how far it can shoot) | |
+| damage (how much damage per shot) | |
+| fire_rate (time between shots) | |
+| cost (price to place the tower) | |
+| target (the enemy currently aimed at) | Enemy |
+| _fire_timer (cooldown tracker) | |
+
+| Class Methods: | Class Collaborations (other classes): |
+|---|---|
+| find_target(enemies): find nearest enemy in range | Enemy |
+| can_fire(): check if cooldown is ready | |
+| update_timer(dt): decrease fire cooldown | |
+| reset_timer(): reset cooldown after firing | |
+| render(): draw the tower on the map | Pygame |
+| draw_range(): show attack range circle | Pygame |
+
+---
+
+## Class name: ArrowTower (inherits Tower)
+
+| Class Attributes: | Class Collaborations (other classes): |
+|---|---|
+| damage = 25 | |
+| tower_range = 150 | |
+| fire_rate = 1.0 | |
+| cost = 50 | |
+
+| Class Methods: | Class Collaborations (other classes): |
+|---|---|
+| Inherits all methods from Tower | |
+
+---
+
+## Class name: BombTower (inherits Tower)
+
+| Class Attributes: | Class Collaborations (other classes): |
+|---|---|
+| damage = 40 | |
+| tower_range = 100 | |
+| fire_rate = 2.0 | |
+| cost = 100 | |
+| blast_radius (area of explosion) | |
+
+| Class Methods: | Class Collaborations (other classes): |
+|---|---|
+| Inherits all methods from Tower | |
+
+---
+
+## Class name: FreezeTower (inherits Tower)
+
+| Class Attributes: | Class Collaborations (other classes): |
+|---|---|
+| tower_range = 120 | |
+| slow_amount (speed multiplier) | |
+| cost = 75 | |
+
+| Class Methods: | Class Collaborations (other classes): |
+|---|---|
+| apply_slow(enemies): slow all enemies within range | Enemy |
+
+---
+
+## Class name: Enemy (inherits GameObject)
+
+| Class Attributes: | Class Collaborations (other classes): |
+|---|---|
+| health (current hit points) | |
+| max_health (starting hit points) | |
+| speed (how fast it moves per frame) | |
+| original_speed (stored for freeze restore) | |
+| reward (money given when destroyed) | |
+| current_waypoint_index (next waypoint to reach) | |
+| alive (whether the enemy is still active) | |
+| reached_end (whether it passed the last waypoint) | |
+
+| Class Methods: | Class Collaborations (other classes): |
+|---|---|
+| move(): step toward the next waypoint | |
+| take_damage(amount): reduce health by amount | |
+| is_dead(): check if health is zero or below | |
+| render(): draw itself and its health bar | Pygame |
+
+---
+
+## Class name: FastEnemy (inherits Enemy)
+
+| Class Attributes: | Class Collaborations (other classes): |
+|---|---|
+| max_health = 50 (low) | |
+| speed = 4 (high) | |
+| reward = 10 | |
+
+| Class Methods: | Class Collaborations (other classes): |
+|---|---|
+| Inherits all methods from Enemy | |
+
+---
+
+## Class name: TankEnemy (inherits Enemy)
+
+| Class Attributes: | Class Collaborations (other classes): |
+|---|---|
+| max_health = 200 (high) | |
+| speed = 1 (low) | |
+| reward = 30 | |
+
+| Class Methods: | Class Collaborations (other classes): |
+|---|---|
+| Inherits all methods from Enemy | |
+
+---
+
+## Class name: Projectile (inherits GameObject)
+
+| Class Attributes: | Class Collaborations (other classes): |
+|---|---|
+| damage (how much damage on hit) | |
+| speed (how fast it travels) | |
+| target (reference to the enemy it tracks) | Enemy |
+| alive (whether projectile is still active) | |
+
+| Class Methods: | Class Collaborations (other classes): |
+|---|---|
+| move(): step toward the target's current position | Enemy |
+| hit(): deal damage to target and mark as dead | Enemy |
+| render(): draw itself on screen | Pygame |
+
+---
+
+## Class name: BombProjectile (inherits Projectile)
+
+| Class Attributes: | Class Collaborations (other classes): |
+|---|---|
+| blast_radius (area of explosion) | |
+| enemies_list (reference to all enemies for splash) | Enemy |
+
+| Class Methods: | Class Collaborations (other classes): |
+|---|---|
+| hit(): deal splash damage to all enemies in blast radius | Enemy |
+
+---
+
+## Class name: Wave
+
+| Class Attributes: | Class Collaborations (other classes): |
+|---|---|
+| wave_number (which wave this is) | |
+| spawn_queue (list of enemy types and delays) | |
+| spawn_timer (time until next spawn in ms) | |
+| started (whether wave has begun) | |
+| all_spawned (whether all enemies pushed out) | |
+
+| Class Methods: | Class Collaborations (other classes): |
+|---|---|
+| update(dt_ms): spawn next enemy if delay passed | Enemy, FastEnemy, TankEnemy |
+| is_complete(): check if all enemies have been spawned | |
+
+---
+
+## Class name: Game
+
+| Class Attributes: | Class Collaborations (other classes): |
+|---|---|
+| towers (list of all placed towers) | Tower |
+| enemies (list of all active enemies) | Enemy |
+| projectiles (list of all active projectiles) | Projectile |
+| wave (current Wave object) | Wave |
+| money (player's current money) | |
+| lives (player's remaining lives) | |
+| score (player's current score) | |
+| selected_tower_class (tower type chosen for placement) | Tower |
+| game_over, game_won (win/lose state) | |
+
+| Class Methods: | Class Collaborations (other classes): |
+|---|---|
+| _build_window(): initialize Pygame window | Pygame |
+| draw_map(): draw background and path | Pygame |
+| draw_side_panel(): draw stats and tower buttons | Pygame |
+| _handle_click(mx, my): route clicks to buttons or map | Tower |
+| _select_tower(name): choose a tower type to place | Tower |
+| _placement_is_valid(x, y, cls): check if spot is valid | GameObject |
+| _try_place_tower(x, y): subtract cost and place tower | Tower |
+| _start_wave(): begin spawning the next wave | Wave |
+| _update_towers(dt): targeting and firing logic | Tower, Enemy, Projectile |
+| _update_projectiles(): move projectiles, remove dead | Projectile |
+| update(): run one frame of game logic | Tower, Enemy, Projectile, Wave |
+| draw(): render everything to screen | Pygame |
+| run(): main game loop | Pygame |
   - **Branches**: This project will **require** effective use of git. 
 
  Each partner should create a branch at the beginning of the project, and stay on this branch (or branches of their 
