@@ -107,6 +107,7 @@ class Game:
         self.game_over = False
         self.game_won = False
         self.wave_active = False
+        self.paused = False
 
         # Lists to track game objects
         self.towers = []
@@ -599,7 +600,13 @@ class Game:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
                     self.running = False
-                if event.key == pygame.K_SPACE and not self.game_over:
+                if event.key == pygame.K_p and not self.game_over:
+                    self.paused = not self.paused
+                    if self.paused:
+                        self.status_message = "PAUSED. Press P to resume."
+                    else:
+                        self.status_message = "Resumed!"
+                if event.key == pygame.K_SPACE and not self.game_over and not self.paused:
                     self._start_wave()
 
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -613,7 +620,7 @@ class Game:
         Update game state each frame: spawn enemies, move them,
         update towers, move projectiles, check win/lose.
         """
-        if self.game_over:
+        if self.game_over or self.paused:
             return
 
         dt_ms = self.clock.get_time()
@@ -688,7 +695,28 @@ class Game:
         if self.game_over:
             self.draw_game_over()
 
+        if self.paused:
+            self.draw_paused()
+
         pygame.display.flip()
+
+    def draw_paused(self):
+        """
+        Draw a semi-transparent pause overlay on the game area.
+        """
+        overlay = pygame.Surface((GAME_AREA_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 100))
+        self.screen.blit(overlay, (0, 0))
+
+        pause_text = self.font_huge.render("PAUSED", True, WHITE)
+        pause_rect = pause_text.get_rect(
+            center=(GAME_AREA_WIDTH // 2, SCREEN_HEIGHT // 2 - 20))
+        self.screen.blit(pause_text, pause_rect)
+
+        resume_text = self.font_medium.render("Press P to resume", True, GRAY)
+        resume_rect = resume_text.get_rect(
+            center=(GAME_AREA_WIDTH // 2, SCREEN_HEIGHT // 2 + 30))
+        self.screen.blit(resume_text, resume_rect)
 
     # -----------------------------------------------------------------------
     # MAIN LOOP
