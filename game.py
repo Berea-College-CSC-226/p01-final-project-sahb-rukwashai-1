@@ -337,7 +337,7 @@ class Game:
         pygame.draw.line(self.screen, PANEL_BORDER, (x,cy-8), (SCREEN_WIDTH-12,cy-8), 1)
         ch = self.font_sm.render("CONTROLS", True, LIGHT_GRAY)
         self.screen.blit(ch, ch.get_rect(center=(GAME_AREA_WIDTH+SIDE_PANEL_WIDTH//2, cy+2))); cy+=18
-        for key, act in [("SPACE","Start wave"),("P","Pause"),("Q","Quit"),("CLICK","Place tower")]:
+        for key, act in [("SPACE","Start wave"),("P","Pause"),("R","Restart"),("Q","Quit"),("CLICK","Place tower")]:
             self.screen.blit(self.font_xs.render(key, True, GOLD), (x+5, cy))
             self.screen.blit(self.font_xs.render(f" {act}", True, GRAY), (x+50, cy)); cy+=15
 
@@ -354,8 +354,18 @@ class Game:
         for s in stats:
             st = self.font_med.render(s, True, WHITE)
             self.screen.blit(st, st.get_rect(center=(cx, sy))); sy+=25
-        qt = self.font_sm.render("Press Q to quit", True, GRAY)
+        qt = self.font_sm.render("Press R to restart  |  Press Q to quit", True, GRAY)
         self.screen.blit(qt, qt.get_rect(center=(cx, sy+20)))
+
+        # Restart button
+        self.restart_rect = pygame.Rect(cx - 80, sy + 45, 160, 40)
+        mp = pygame.mouse.get_pos()
+        hov = self.restart_rect.collidepoint(mp)
+        btn_col = (80, 180, 80) if hov else (60, 140, 60)
+        pygame.draw.rect(self.screen, btn_col, self.restart_rect, border_radius=6)
+        pygame.draw.rect(self.screen, WHITE, self.restart_rect, 2, border_radius=6)
+        rt = self.font_stat.render("PLAY AGAIN", True, WHITE)
+        self.screen.blit(rt, rt.get_rect(center=self.restart_rect.center))
 
     def draw_paused(self):
         ov = pygame.Surface((GAME_AREA_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
@@ -378,6 +388,17 @@ class Game:
     def _deselect_tower(self):
         self.selected_tower_name = self.selected_tower_class = None
         self.status_message = "Select a tower to place."
+
+    def _restart(self):
+        """Reset all game state for a new game."""
+        self.money, self.lives, self.score, self.kills = 200, 20, 0, 0
+        self.current_wave = 0
+        self.game_over = self.game_won = self.wave_active = self.paused = False
+        self.towers, self.enemies, self.projectiles = [], [], []
+        self.floating_texts, self.particles = [], []
+        self.wave = None
+        self.selected_tower_name = self.selected_tower_class = None
+        self.status_message = "Press SPACE to start wave 1."
 
     def _placement_is_valid(self, x, y, cls):
         if self.money < cls.cost:
@@ -460,13 +481,18 @@ class Game:
             if event.type == pygame.QUIT: self.running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q: self.running = False
+                if event.key == pygame.K_r and self.game_over:
+                    self._restart()
                 if event.key == pygame.K_p and not self.game_over:
                     self.paused = not self.paused
                     self.status_message = "PAUSED. Press P to resume." if self.paused else "Resumed!"
                 if event.key == pygame.K_SPACE and not self.game_over and not self.paused:
                     self._start_wave()
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                self._handle_click(*event.pos)
+                if self.game_over and hasattr(self, 'restart_rect') and self.restart_rect.collidepoint(event.pos):
+                    self._restart()
+                else:
+                    self._handle_click(*event.pos)
 
     # --- UPDATE ---
     def update(self):
