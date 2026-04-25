@@ -314,7 +314,22 @@ What has surprised you so far? Describe your general feelings. Be honest with yo
   before the deadline.
 
 ```
-    **Replace this with your reflection
+    Completion Percentage: 90%
+
+The core game is fully functional. Towers place and shoot, enemies walk the path and take
+damage, waves spawn with increasing difficulty, freeze tower slows enemies, bomb tower does
+splash damage, there's a pause system, restart button, floating damage numbers, death
+particles, and a polished UI with stat bars and a pre-rendered map with trees and flowers.
+The test suite covers all the logic classes. The main things left are final code cleanup,
+finishing the README, and making sure the issue queue is in good shape for submission.
+
+We feel confident about finishing on time. The hard parts (game loop, targeting, projectiles,
+wave system) are done and tested. What's left is mostly writing and cleanup, not coding. The
+biggest risk would be finding a last-minute bug during the demo, but the test suite should
+catch most logic issues before that happens. Our strategy for the final stretch is to play
+through the game a few times to catch edge cases, have each other review the code for
+anything we missed, and write the README sections incrementally instead of leaving them all
+for the last night.
 ```
 
 ---
