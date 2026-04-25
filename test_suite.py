@@ -18,7 +18,7 @@ from enemies import Enemy, FastEnemy, TankEnemy
 from waves import Wave, WAVE_DATA
 from projectiles import Projectile, BombProjectile
 from path_data import WAYPOINTS, PATH_WIDTH
-from game import is_on_path, _point_segment_distance
+from game import is_on_path, _point_seg_dist
 
 
 # TEST HELPER
@@ -351,19 +351,19 @@ def test_path_validation():
 
     # Test _point_segment_distance with simple cases
     # Point directly on the segment
-    dist = _point_segment_distance(5, 0, 0, 0, 10, 0)
+    dist = _point_seg_dist(5, 0, 0, 0, 10, 0)
     unittest(dist == 0.0)
 
     # Point perpendicular to segment
-    dist = _point_segment_distance(5, 3, 0, 0, 10, 0)
+    dist = _point_seg_dist(5, 3, 0, 0, 10, 0)
     unittest(dist == 3.0)
 
     # Point at segment endpoint
-    dist = _point_segment_distance(0, 0, 0, 0, 10, 0)
+    dist = _point_seg_dist(0, 0, 0, 0, 10, 0)
     unittest(dist == 0.0)
 
     # Point beyond segment end
-    dist = _point_segment_distance(15, 0, 0, 0, 10, 0)
+    dist = _point_seg_dist(15, 0, 0, 0, 10, 0)
     unittest(dist == 5.0)
 
 # FREEZE TOWER TESTS
