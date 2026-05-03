@@ -410,7 +410,32 @@ All known bugs and limitations are documented in the GitHub issue queue. The key
 ```
 
 ```
-    Partner 2: **Replace this with your reflection
-```
+    Partner 2: Here's your reflection, written in your own voice but polished into proper paragraphs:
+
+---
+
+**Partner 2:**
+
+I supported this project idea from the start even though it came from my partner. I was genuinely curious to see what 
+we could build together and whether the final product would be something enjoyable, especially for younger players. 
+Tower defense games have a simple enough concept that kids can pick them up quickly, but they also require real strategy,
+ so I wanted to see if we could pull that balance off. That curiosity ended up being enough motivation to push through 
+ the harder parts of the project.
+
+Our starting plan was more of a rough picture than a detailed blueprint. We had a general vision but not all the pieces 
+figured out yet, and we discovered what we actually needed as we built. Many things changed along the way. 
+We wanted to add more features and make the game as interactive and user-friendly as possible, but we had to make 
+realistic decisions about what we could actually finish in time. That process of adjusting our expectations taught 
+me that planning and building are two very different skills, and you need both.
+
+What surprised me most about what I learned was personal as much as technical. I am not someone who plays video games, 
+but working on this project made me genuinely excited to play something I helped create. That was a feeling I did not 
+expect. On the technical side, I got hands-on experience with game-related libraries I had never used before and 
+developed a real appreciation for how much logic goes into something that looks simple on the surface.
+
+The hardest part for me was the moments when my partner and I had to agree on a specific feature, 
+especially when we each had a different picture of how it should look or work. Talking through those disagreements 
+took time and patience. Bhushan was a great teammate throughout the process. He is patient, thoughtful, 
+and genuinely invested in doing the work well, which made it easier to work through those moments and keep moving forward.
 
 ---
