@@ -2,9 +2,6 @@
 
 ## Instructions
 
-❗️Exclamation Marks ❗️indicate action items; you should remove these emoji as you complete/update the items which 
-  they accompany. (This means that your final README should have no ❗️in it!)
-
 **Author(s)**: Bhushan Sah & Daniel Rukwasha
 
 **Google Doc Link**: https://docs.google.com/document/d/1lKuOB9pPnH6yuEsixRnpE7bPGq9S8JdDnZPzu4O5a8s/edit?usp=sharing
@@ -16,8 +13,8 @@
 
 **Title**: `Path of No Return: A Tower Defense Game`
 
-**Purpose**: `A tower defense game where the player places different types of towers along a winding path to stop waves
- of enemies from reaching the exit, built with Turtle graphics and a Tkinter control panel.`
+**Purpose**: `A tower defense game where the player places different types of towers along a winding path
+to stop waves of enemies from reaching the exit, built with Pygame.`
 
 **Source Assignment(s)**: `T02 (Exploring Turtles), HW02 (Loopy Turtles), HW09 (UPC Barcodes), HW10 (Caesar Cipher), T10 (Pet Adoption Center),
    T11 (The Legend of Tuna)`
@@ -410,8 +407,7 @@ All known bugs and limitations are documented in the GitHub issue queue. The key
 ```
 
 ```
-
-**Partner 2:**
+  Partner 2: Daniel Rukwasha
 
 I supported this project idea from the start even though it came from my partner. I was genuinely curious to see what 
 we could build together and whether the final product would be something enjoyable, especially for younger players. 
@@ -434,5 +430,3 @@ The hardest part for me was the moments when my partner and I had to agree on a 
 especially when we each had a different picture of how it should look or work. Talking through those disagreements 
 took time and patience. Bhushan was a great teammate throughout the process. He is patient, thoughtful, 
 and genuinely invested in doing the work well, which made it easier to work through those moments and keep moving forward.
-
----
