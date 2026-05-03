@@ -410,9 +410,6 @@ All known bugs and limitations are documented in the GitHub issue queue. The key
 ```
 
 ```
-    Partner 2: Here's your reflection, written in your own voice but polished into proper paragraphs:
-
----
 
 **Partner 2:**
 
