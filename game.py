@@ -211,18 +211,18 @@ class Game:
     def _build_buttons(self):
         """Create tower button rects."""
         self.tower_buttons = []
-        x, y = GAME_AREA_WIDTH + 12, 295
-        bw, bh = SIDE_PANEL_WIDTH - 24, 58
+        x, y = GAME_AREA_WIDTH + 8, 260
+        bw, bh = SIDE_PANEL_WIDTH - 16, 50
         info = [
-            ("Arrow", ArrowTower, (55,110,55), (80,160,80), "DMG:25 | RNG:150 | Fast"),
-            ("Bomb", BombTower, (130,45,45), (180,80,80), "DMG:40 | RNG:100 | Slow"),
-            ("Freeze", FreezeTower, (45,85,130), (80,130,180), "SLW:50% | RNG:120 | No DMG"),
+            ("Arrow", ArrowTower, (55,110,55), (80,160,80), "DMG:25 | RNG:150"),
+            ("Bomb", BombTower, (130,45,45), (180,80,80), "DMG:40 | Splash"),
+            ("Freeze", FreezeTower, (45,85,130), (80,130,180), "SLW:50% | RNG:120"),
         ]
         for name, cls, col, hcol, desc in info:
             r = pygame.Rect(x, y, bw, bh)
             self.tower_buttons.append({"name":name,"class":cls,"color":col,"hover":hcol,"desc":desc,"rect":r})
-            y += bh + 8
-        self.cancel_rect = pygame.Rect(x, y+4, bw, 28)
+            y += bh + 6
+        self.cancel_rect = pygame.Rect(x, y+2, bw, 24)
 
     # --- DRAWING ---
     def draw_map(self):
@@ -271,7 +271,7 @@ class Game:
 
     def _draw_stat_bar(self, x, y, label, value, color, ratio):
         """Draw a stat label, value, and thin progress bar."""
-        bw = SIDE_PANEL_WIDTH - 24
+        bw = SIDE_PANEL_WIDTH - 16
         self.screen.blit(self.font_xs.render(label, True, GRAY), (x, y))
         vt = self.font_stat.render(value, True, color)
         self.screen.blit(vt, (x + bw - vt.get_width(), y))
@@ -282,24 +282,24 @@ class Game:
             pygame.draw.rect(self.screen, color, (x, bar_y, int(bw*ratio), 5), border_radius=2)
 
     def draw_side_panel(self):
-        """Draw side panel with stats, buttons, status, controls."""
+        """Draw compact side panel with stats, buttons, status, controls."""
         pygame.draw.rect(self.screen, PANEL_BG, (GAME_AREA_WIDTH, 0, SIDE_PANEL_WIDTH, SCREEN_HEIGHT))
-        pygame.draw.rect(self.screen, PANEL_HEADER, (GAME_AREA_WIDTH, 0, SIDE_PANEL_WIDTH, 50))
-        pygame.draw.line(self.screen, GOLD, (GAME_AREA_WIDTH,50), (SCREEN_WIDTH,50), 2)
-        t = self.font_title.render("PATH OF NO RETURN", True, GOLD)
-        self.screen.blit(t, t.get_rect(center=(GAME_AREA_WIDTH + SIDE_PANEL_WIDTH//2, 25)))
+        pygame.draw.rect(self.screen, PANEL_HEADER, (GAME_AREA_WIDTH, 0, SIDE_PANEL_WIDTH, 40))
+        pygame.draw.line(self.screen, GOLD, (GAME_AREA_WIDTH,40), (SCREEN_WIDTH,40), 2)
+        t = self.font_stat.render("PATH OF NO RETURN", True, GOLD)
+        self.screen.blit(t, t.get_rect(center=(GAME_AREA_WIDTH + SIDE_PANEL_WIDTH//2, 20)))
 
-        x, y = GAME_AREA_WIDTH + 12, 60
-        self._draw_stat_bar(x, y, "MONEY", f"${self.money}", GOLD, self.money/500); y+=38
-        self._draw_stat_bar(x, y, "LIVES", str(self.lives), RED, self.lives/20); y+=38
-        self._draw_stat_bar(x, y, "SCORE", str(self.score), WHITE, min(self.score/500,1)); y+=38
-        self._draw_stat_bar(x, y, "KILLS", str(self.kills), (200,150,255), min(self.kills/50,1)); y+=38
+        x, y = GAME_AREA_WIDTH + 8, 50
+        self._draw_stat_bar(x, y, "MONEY", f"${self.money}", GOLD, self.money/500); y+=32
+        self._draw_stat_bar(x, y, "LIVES", str(self.lives), RED, self.lives/20); y+=32
+        self._draw_stat_bar(x, y, "SCORE", str(self.score), WHITE, min(self.score/500,1)); y+=32
+        self._draw_stat_bar(x, y, "KILLS", str(self.kills), (200,150,255), min(self.kills/50,1)); y+=32
         self._draw_stat_bar(x, y, "WAVE", f"{self.current_wave}/{self.total_waves}", (100,200,255),
-                           self.current_wave/max(self.total_waves,1)); y+=45
+                           self.current_wave/max(self.total_waves,1)); y+=35
 
-        pygame.draw.line(self.screen, PANEL_BORDER, (x,y), (SCREEN_WIDTH-12,y), 1); y+=10
-        h = self.font_sm.render("SELECT TOWER", True, LIGHT_GRAY)
-        self.screen.blit(h, h.get_rect(center=(GAME_AREA_WIDTH+SIDE_PANEL_WIDTH//2, y+6))); y+=20
+        pygame.draw.line(self.screen, PANEL_BORDER, (x,y), (SCREEN_WIDTH-8,y), 1); y+=6
+        h = self.font_xs.render("SELECT TOWER", True, LIGHT_GRAY)
+        self.screen.blit(h, h.get_rect(center=(GAME_AREA_WIDTH+SIDE_PANEL_WIDTH//2, y+4))); y+=14
 
         mp = pygame.mouse.get_pos()
         for btn in self.tower_buttons:
@@ -308,40 +308,37 @@ class Game:
             hov = r.collidepoint(mp)
             afford = self.money >= btn["class"].cost
             bg = btn["hover"] if (sel or (hov and afford)) else (50,50,50) if not afford else btn["color"]
-            pygame.draw.rect(self.screen, bg, r, border_radius=6)
+            pygame.draw.rect(self.screen, bg, r, border_radius=5)
             bdr = SELECTED_BORDER if sel else (80,80,80) if not afford else (100,100,120)
-            pygame.draw.rect(self.screen, bdr, r, 3 if sel else 1, border_radius=6)
+            pygame.draw.rect(self.screen, bdr, r, 3 if sel else 1, border_radius=5)
             nc = WHITE if afford else GRAY
-            self.screen.blit(self.font_stat.render(f"{btn['name']} Tower", True, nc), (r.x+10, r.y+6))
-            cc = GOLD if afford else (100,100,100)
-            self.screen.blit(self.font_stat.render(f"${btn['class'].cost}", True, cc), (r.right-50, r.y+6))
+            self.screen.blit(self.font_xs.render(f"{btn['name']} ${btn['class'].cost}", True, nc), (r.x+8, r.y+5))
             dc = LIGHT_GRAY if afford else (80,80,80)
-            self.screen.blit(self.font_xs.render(btn["desc"], True, dc), (r.x+10, r.y+26))
+            self.screen.blit(self.font_xs.render(btn["desc"], True, dc), (r.x+8, r.y+22))
             if not afford:
-                self.screen.blit(self.font_xs.render("NOT ENOUGH $", True, (180,80,80)), (r.x+10, r.y+40))
+                self.screen.blit(self.font_xs.render("NO $", True, (180,80,80)), (r.right-35, r.y+5))
 
         ch = self.cancel_rect.collidepoint(mp)
-        pygame.draw.rect(self.screen, (80,80,90) if ch else (55,55,65), self.cancel_rect, border_radius=4)
-        ct = self.font_xs.render("Cancel selection", True, GRAY)
+        pygame.draw.rect(self.screen, (80,80,90) if ch else (55,55,65), self.cancel_rect, border_radius=3)
+        ct = self.font_xs.render("Cancel", True, GRAY)
         self.screen.blit(ct, ct.get_rect(center=self.cancel_rect.center))
 
-        dy = self.cancel_rect.bottom + 12
-        pygame.draw.line(self.screen, PANEL_BORDER, (x,dy), (SCREEN_WIDTH-12,dy), 1)
-        sy = dy + 8
-        sb = pygame.Rect(x, sy, SIDE_PANEL_WIDTH-24, 50)
+        dy = self.cancel_rect.bottom + 8
+        pygame.draw.line(self.screen, PANEL_BORDER, (x,dy), (SCREEN_WIDTH-8,dy), 1)
+        sy = dy + 6
+        sb = pygame.Rect(x, sy, SIDE_PANEL_WIDTH-16, 45)
         pygame.draw.rect(self.screen, (35,35,45), sb, border_radius=4)
         pygame.draw.rect(self.screen, PANEL_BORDER, sb, 1, border_radius=4)
-        ty = sy + 6
+        ty = sy + 5
         for line in self.status_message.split("\n"):
-            self.screen.blit(self.font_xs.render(line, True, SELECTED_BORDER), (x+8, ty)); ty+=16
+            self.screen.blit(self.font_xs.render(line, True, SELECTED_BORDER), (x+6, ty)); ty+=14
 
-        cy = SCREEN_HEIGHT - 75
-        pygame.draw.line(self.screen, PANEL_BORDER, (x,cy-8), (SCREEN_WIDTH-12,cy-8), 1)
-        ch = self.font_sm.render("CONTROLS", True, LIGHT_GRAY)
-        self.screen.blit(ch, ch.get_rect(center=(GAME_AREA_WIDTH+SIDE_PANEL_WIDTH//2, cy+2))); cy+=18
+        cy = SCREEN_HEIGHT - 70
+        pygame.draw.line(self.screen, PANEL_BORDER, (x,cy-6), (SCREEN_WIDTH-8,cy-6), 1)
+        ch = self.font_xs.render("CONTROLS", True, LIGHT_GRAY)
+        self.screen.blit(ch, ch.get_rect(center=(GAME_AREA_WIDTH+SIDE_PANEL_WIDTH//2, cy+2))); cy+=14
         for key, act in [("SPACE","Start wave"),("P","Pause"),("R","Restart"),("Q","Quit"),("CLICK","Place tower")]:
-            self.screen.blit(self.font_xs.render(key, True, GOLD), (x+5, cy))
-            self.screen.blit(self.font_xs.render(f" {act}", True, GRAY), (x+50, cy)); cy+=15
+            self.screen.blit(self.font_xs.render(f"{key} {act}", True, GRAY), (x+4, cy)); cy+=13
 
     def draw_game_over(self):
         ov = pygame.Surface((GAME_AREA_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
