@@ -335,20 +335,39 @@ for the last night.
 
 ## Milestone 4: Final Code, Presentation, Demo
 
-### ❗User Instructions
+### User Instructions
 
-❗In a paragraph, explain how to use your program. Assume the user is starting just after they hit the "Run" button 
-in PyCharm. 
+When you run the program, a game window opens with a green map on the left and a dark control panel on the right. The map 
+shows a winding dirt path with a red pulsing SPAWN marker and a gold pulsing EXIT marker. To start playing, press SPACE
+to launch the first wave of enemies. Enemies will appear at the spawn point and walk along the path toward the exit. 
+Before or during a wave, click one of the three tower buttons on the side panel (Arrow, Bomb, or Freeze)to select a tower 
+type. Then click anywhere on the green grass to place it. A blue range preview follows your cursor showing where the tower
+can reach, and the square turns green if the spot is valid or red if it is not. Towers automatically detect and shoot at
+enemies within range. Arrow towers fire fast single shots, bomb towers fire slow area-damage explosions, and freeze towers 
+slow all enemies nearby without dealing damage. You earn money for each enemy killed which you can spend on more towers. 
+If an enemy reaches the exit you lose a life. Lose all 20 lives and the game is over. Clear all 5 waves and you win. Press
+P to pause, R to restart after a game over, and Q to quit.
 
-### ❗Errors and Constraints
 
-❗Every program has bugs or features that had to be scrapped for time. These bugs should be tracked in the issue queue. 
-You should already have a few items in here from the prior weeks. Create a new issue for any undocumented errors and 
-deficiencies that remain in your code. Bugs found that aren't acknowledged in the queue will be penalized.
+### Errors and Constraints
 
-### ❗Reflection
+All known bugs and limitations are documented in the GitHub issue queue. The key ones are:
 
-❗Each partner should write three to four well-written paragraphs address the following (at a minimum):
+- Freeze tower slow does not stack with multiple freeze towers. Two freeze towers next to each other slow enemies the 
+  same amount as one.
+- Projectiles can briefly render off-screen if an enemy dies right at the map edge .
+- Placing towers very close together sometimes overlaps visually even though the collision check passes.
+- Wave cleared banner sometimes overlaps with floating damage text.
+- Towers cannot be sold or moved after placement.
+- No sound effects or music.
+- No difficulty selection. Waves are hardcoded.
+- No start menu screen. The game loads directly into gameplay.
+- Window size is fixed and cannot be resized.
+- No save system for high scores.
+
+### Reflection
+
+ Each partner should write three to four well-written paragraphs address the following (at a minimum):
 - Why did you select the project that you did?
 - How closely did your final project reflect your initial design?
 - What did you learn from this process?
@@ -357,7 +376,37 @@ deficiencies that remain in your code. Bugs found that aren't acknowledged in th
 - How well did you work with your partner? What made it go well? What made it challenging?
 
 ```
-    Partner 1: **Replace this with your reflection
+    Partner 1: Bhushan Sah 
+   We picked the tower defense game because it covered basically everything from this course in one project. We needed 
+   classes and inheritance for the tower and enemy types,lists to manage all the game objects, dictionaries for mapping 
+   tower names to their classes, file I/O patterns from earlier assignments, exception handling concepts, and Pygame for 
+   the GUI. It was one of those ideas where every chapter had a clear place in the code, which made it feel like a real 
+   capstone project rather than something that only used a few topics. 
+   
+   The final version ended up pretty close to what we designed in Milestone 1. The six main subtasks from our top-down
+   design all made it into the game. We actually added more than we planned. Floating damage numbers, death particles, 
+   the wave cleared banner, pause and restart systems, and the pre-rendered map with trees and flowers were all things
+   we came up with while building. The only feature we cut was tower selling because the UI for selecting an already-placed
+   tower got complicated and we decided our time was better spent polishing what we had.
+   
+   We learned a lot about how important design is before writing code. The top-down design from HW11 felt tedious at the 
+   time but it gave us a clear roadmap for what to build and in what order. We also learned how to split a large program 
+   across multiple files and have them work together through imports, which is something we never did in earlier assignments. 
+   Working with Git branches and merging taught us how real collaboration works. On the technical side, we got a much deeper
+   understanding of how game loops work, how to separate game logic from rendering, and how to test code that has a visual 
+   component by isolating the logic into testable functions.
+   
+   The hardest part was the projectile and targeting system. Each tower has to scan all enemies every frame, pick the
+   closest one in range, check its fire cooldown, then create a projectile that recalculates its direction every frame 
+   because the target is moving. Bomb projectiles made it worse because they deal splash damage on impact, so we had to 
+   loop through all enemies again at the hit location. The trickiest bug was enemies being removed from the list while we 
+   were still iterating over it, which we fixed by iterating over a copy of the list with the slice notation.
+   
+   Next time we would write the test suite alongside the code instead of after. We caught a couple of issues late that we 
+   could have found earlier with tests in place from the start. Working with Daniel went smoothly for the most part. Splitting
+   tasks clearly in the design phase meant we could work on separate branches without conflicts. The only friction was when
+   we both needed to edit game.py at the same time, but we handled it by communicating before pushing and merging frequently 
+   instead of waiting until the end.
 ```
 
 ```
