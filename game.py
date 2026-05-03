@@ -10,8 +10,8 @@ from enemies import Enemy
 from waves import Wave, WAVE_DATA
 from projectiles import Projectile, BombProjectile
 
-SCREEN_WIDTH = 1000
-SCREEN_HEIGHT = 700
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 650
 SIDE_PANEL_WIDTH = SCREEN_WIDTH - GAME_AREA_WIDTH
 FPS = 60
 PATH_BUFFER = 30
@@ -117,6 +117,8 @@ class Game:
         self.money, self.lives, self.score, self.kills = 200, 20, 0, 0
         self.current_wave, self.total_waves = 0, len(WAVE_DATA)
         self.game_over = self.game_won = self.wave_active = self.paused = False
+        self.wave_cleared = False
+        self.wave_cleared_timer = 0
         self.towers, self.enemies, self.projectiles = [], [], []
         self.floating_texts, self.particles = [], []
         self.wave = None
@@ -394,6 +396,8 @@ class Game:
         self.money, self.lives, self.score, self.kills = 200, 20, 0, 0
         self.current_wave = 0
         self.game_over = self.game_won = self.wave_active = self.paused = False
+        self.wave_cleared = False
+        self.wave_cleared_timer = 0
         self.towers, self.enemies, self.projectiles = [], [], []
         self.floating_texts, self.particles = [], []
         self.wave = None
@@ -487,6 +491,7 @@ class Game:
                     self.paused = not self.paused
                     self.status_message = "PAUSED. Press P to resume." if self.paused else "Resumed!"
                 if event.key == pygame.K_SPACE and not self.game_over and not self.paused:
+                    self.wave_cleared = False
                     self._start_wave()
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if self.game_over and hasattr(self, 'restart_rect') and self.restart_rect.collidepoint(event.pos):
@@ -500,6 +505,13 @@ class Game:
         dt = dt_ms / 1000.0
         self._update_effects(dt)
         self.frame_count += 1
+
+        # Tick down the wave cleared banner timer
+        if self.wave_cleared:
+            self.wave_cleared_timer -= dt
+            if self.wave_cleared_timer <= 0:
+                self.wave_cleared = False
+
         if self.game_over or self.paused: return
 
         # Spawn enemies
@@ -535,12 +547,39 @@ class Game:
                 self.status_message = "All waves cleared! You win!"
                 self.game_over = self.game_won = True
             else:
+                self.wave_cleared = True
+                self.wave_cleared_timer = 3.0
                 self.status_message = f"Wave {self.current_wave} cleared!\nPress SPACE for wave {self.current_wave+1}."
 
         # Lose check
         if self.lives <= 0:
             self.lives = 0; self.game_over = True; self.game_won = False
             self.status_message = "Game Over! You ran out of lives."
+
+    def draw_wave_cleared(self):
+        """Draw a banner showing the wave was cleared."""
+        cx = GAME_AREA_WIDTH // 2
+        cy = SCREEN_HEIGHT // 2
+
+        # Semi-transparent banner background
+        banner_w, banner_h = 400, 150
+        banner = pygame.Surface((banner_w, banner_h), pygame.SRCALPHA)
+        banner.fill((0, 0, 0, 160))
+        pygame.draw.rect(banner, GOLD, (0, 0, banner_w, banner_h), 3, border_radius=10)
+        self.screen.blit(banner, (cx - banner_w//2, cy - banner_h//2))
+
+        # Wave cleared text
+        t1 = self.font_large.render(f"WAVE {self.current_wave} CLEARED!", True, GOLD)
+        self.screen.blit(t1, t1.get_rect(center=(cx, cy - 35)))
+
+        # Stats for this wave
+        t2 = self.font_med.render(f"Score: {self.score}  |  Kills: {self.kills}", True, WHITE)
+        self.screen.blit(t2, t2.get_rect(center=(cx, cy + 5)))
+
+        # Next wave prompt (blinking)
+        if int(self.frame_count * 0.05) % 2 == 0:
+            t3 = self.font_sm.render(f"Press SPACE to start wave {self.current_wave + 1}", True, LIGHT_GRAY)
+            self.screen.blit(t3, t3.get_rect(center=(cx, cy + 40)))
 
     # --- DRAW ---
     def draw(self):
@@ -550,6 +589,7 @@ class Game:
         self.draw_projectiles()
         self.draw_effects()
         self.draw_side_panel()
+        if self.wave_cleared: self.draw_wave_cleared()
         if self.game_over: self.draw_game_over()
         if self.paused: self.draw_paused()
         pygame.display.flip()
