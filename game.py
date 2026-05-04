@@ -145,64 +145,155 @@ class Game:
         s = pygame.Surface((GAME_AREA_WIDTH, SCREEN_HEIGHT))
         random.seed(42)
 
-        # Grass gradient
+        # Rich grass gradient with noise
         for y in range(SCREEN_HEIGHT):
-            sh = max(0, 139 - int(y * 0.03))
-            pygame.draw.line(s, (20+int(y*0.01), sh, 20+int(y*0.01)), (0,y), (GAME_AREA_WIDTH,y))
+            base_g = max(90, 145 - int(y * 0.04))
+            for x in range(0, GAME_AREA_WIDTH, 4):
+                noise = random.randint(-8, 8)
+                c = (22 + int(y*0.01), max(0, min(255, base_g + noise)), 22 + int(y*0.01))
+                pygame.draw.rect(s, c, (x, y, 4, 1))
 
-        # Texture patches and blades
-        for _ in range(200):
+        # Large soft grass patches (varied shades)
+        for _ in range(80):
             gx, gy = random.randint(0, GAME_AREA_WIDTH), random.randint(0, SCREEN_HEIGHT)
-            sh = random.randint(20, 50)
-            pygame.draw.rect(s, (sh, 80+random.randint(0,40), sh),
-                           (gx, gy, random.randint(8,25), random.randint(8,25)))
-        for _ in range(300):
+            gr = random.randint(15, 40)
+            shade = random.randint(0, 30)
+            patch_surf = pygame.Surface((gr*2, gr*2), pygame.SRCALPHA)
+            pygame.draw.circle(patch_surf, (20+shade, 100+random.randint(0,35), 20+shade, 60), (gr,gr), gr)
+            s.blit(patch_surf, (gx-gr, gy-gr))
+
+        # Grass blade clusters
+        for _ in range(500):
             bx, by = random.randint(0, GAME_AREA_WIDTH), random.randint(0, SCREEN_HEIGHT)
-            pygame.draw.line(s, (30, 100+random.randint(0,50), 30),
-                           (bx, by), (bx+random.randint(-2,2), by-random.randint(4,10)), 1)
+            blade_count = random.randint(2, 5)
+            for _ in range(blade_count):
+                bh = random.randint(5, 14)
+                boff = random.randint(-4, 4)
+                blade_c = (25+random.randint(0,20), 90+random.randint(0,60), 20+random.randint(0,15))
+                pygame.draw.line(s, blade_c, (bx+boff, by), (bx+boff+random.randint(-3,3), by-bh), 1)
 
-        # Trees
-        for _ in range(25):
-            tx, ty = random.randint(30, GAME_AREA_WIDTH-30), random.randint(30, SCREEN_HEIGHT-30)
+        # Tree shadows (drawn before trees)
+        tree_positions = []
+        for _ in range(30):
+            tx, ty = random.randint(40, GAME_AREA_WIDTH-40), random.randint(40, SCREEN_HEIGHT-40)
             if not is_on_path(tx, ty):
-                pygame.draw.rect(s, (80+random.randint(0,30), 50+random.randint(0,20), 20), (tx-2,ty,5,10))
-                cs = random.randint(10, 18)
-                pygame.draw.circle(s, (15+random.randint(0,20), 80+random.randint(0,30), 15), (tx,ty-2), cs)
-                pygame.draw.circle(s, (30+random.randint(0,20), 110+random.randint(0,30), 30), (tx-3,ty-5), cs-3)
-                pygame.draw.circle(s, (60, 150, 60), (tx-4, ty-7), cs//3)
+                tree_positions.append((tx, ty))
+                shadow_surf = pygame.Surface((40, 20), pygame.SRCALPHA)
+                pygame.draw.ellipse(shadow_surf, (0, 0, 0, 40), (0, 0, 40, 20))
+                s.blit(shadow_surf, (tx-20, ty+8))
 
-        # Rocks and flowers
-        for _ in range(15):
+        # Trees with more detail
+        for tx, ty in tree_positions:
+            cs = random.randint(12, 22)
+            # Trunk
+            trunk_w = max(3, cs // 4)
+            trunk_c = (65+random.randint(0,30), 40+random.randint(0,20), 15+random.randint(0,10))
+            pygame.draw.rect(s, trunk_c, (tx-trunk_w//2, ty-2, trunk_w, cs//2+4))
+            # Dark canopy layer
+            dark_c = (10+random.randint(0,15), 65+random.randint(0,30), 10+random.randint(0,15))
+            pygame.draw.circle(s, dark_c, (tx+2, ty), cs)
+            # Mid canopy
+            mid_c = (20+random.randint(0,20), 95+random.randint(0,35), 20+random.randint(0,15))
+            pygame.draw.circle(s, mid_c, (tx-2, ty-3), cs-2)
+            # Light highlight
+            light_c = (45+random.randint(0,20), 135+random.randint(0,30), 40+random.randint(0,15))
+            pygame.draw.circle(s, light_c, (tx-4, ty-6), cs//2)
+            # Tiny top highlight
+            pygame.draw.circle(s, (80, 180, 70), (tx-5, ty-8), cs//4)
+
+        # Bushes (smaller, rounder, placed near path edges)
+        for _ in range(20):
+            bx, by = random.randint(30, GAME_AREA_WIDTH-30), random.randint(30, SCREEN_HEIGHT-30)
+            if not is_on_path(bx, by):
+                bs = random.randint(6, 12)
+                bush_dark = (15+random.randint(0,15), 70+random.randint(0,25), 15)
+                bush_light = (30+random.randint(0,15), 110+random.randint(0,25), 30)
+                pygame.draw.circle(s, bush_dark, (bx, by), bs)
+                pygame.draw.circle(s, bush_light, (bx-2, by-2), bs-2)
+                pygame.draw.circle(s, (50, 140, 50), (bx-3, by-3), bs//3)
+
+        # Rocks with highlights
+        for _ in range(20):
             rx, ry = random.randint(30, GAME_AREA_WIDTH-30), random.randint(30, SCREEN_HEIGHT-30)
             if not is_on_path(rx, ry):
-                rs = 100+random.randint(0,40)
-                pygame.draw.circle(s, (rs, rs-5, rs-20), (rx,ry), random.randint(3,7))
-        for _ in range(40):
+                rsz = random.randint(3, 8)
+                base = 90+random.randint(0,40)
+                pygame.draw.circle(s, (base-20, base-25, base-35), (rx, ry), rsz)
+                pygame.draw.circle(s, (base, base-5, base-15), (rx, ry), rsz-1)
+                pygame.draw.circle(s, (base+30, base+25, base+15), (rx-1, ry-2), max(1, rsz//3))
+
+        # Flowers with petals
+        for _ in range(50):
             fx, fy = random.randint(10, GAME_AREA_WIDTH-10), random.randint(10, SCREEN_HEIGHT-10)
             if not is_on_path(fx, fy):
-                fc = random.choice([(255,100,100),(255,255,100),(200,100,255),(255,180,100),(255,255,255)])
-                pygame.draw.circle(s, fc, (fx,fy), 3)
+                fc = random.choice([(255,90,90),(255,240,80),(220,100,255),(255,170,80),(255,255,240)])
+                # Petals
+                for angle in range(0, 360, 72):
+                    rad = math.radians(angle)
+                    px = fx + int(math.cos(rad) * 3)
+                    py = fy + int(math.sin(rad) * 3)
+                    pygame.draw.circle(s, fc, (px, py), 2)
+                # Center
+                pygame.draw.circle(s, (255, 220, 50), (fx, fy), 2)
+                # Stem
+                pygame.draw.line(s, (30, 90, 25), (fx, fy+2), (fx, fy+7), 1)
 
-        # Path layers
+        # Mushrooms (rare, fun detail)
+        for _ in range(6):
+            mx, my = random.randint(40, GAME_AREA_WIDTH-40), random.randint(40, SCREEN_HEIGHT-40)
+            if not is_on_path(mx, my):
+                # Stem
+                pygame.draw.rect(s, (220, 210, 190), (mx-2, my, 4, 6))
+                # Cap
+                cap_c = random.choice([(200,50,50), (180,120,50), (220,180,80)])
+                pygame.draw.circle(s, cap_c, (mx, my), 6)
+                pygame.draw.circle(s, (min(255,cap_c[0]+40), min(255,cap_c[1]+40), min(255,cap_c[2]+40)),
+                                   (mx-2, my-2), 2)
+
+        # --- PATH ---
+        # Outer worn edge
         if len(WAYPOINTS) > 1:
-            pygame.draw.lines(s, (70,55,35), False, WAYPOINTS, PATH_WIDTH+10)
+            pygame.draw.lines(s, (55,42,28), False, WAYPOINTS, PATH_WIDTH+14)
+            pygame.draw.lines(s, (75,60,40), False, WAYPOINTS, PATH_WIDTH+8)
             pygame.draw.lines(s, PATH_COLOR, False, WAYPOINTS, PATH_WIDTH)
-            pygame.draw.lines(s, (160,140,115), False, WAYPOINTS, PATH_WIDTH-16)
-        for wp in WAYPOINTS:
-            pygame.draw.circle(s, (70,55,35), wp, PATH_WIDTH//2+5)
-            pygame.draw.circle(s, PATH_COLOR, wp, PATH_WIDTH//2)
-            pygame.draw.circle(s, (160,140,115), wp, PATH_WIDTH//2-8)
+            pygame.draw.lines(s, (155,135,110), False, WAYPOINTS, PATH_WIDTH-12)
+            pygame.draw.lines(s, (165,148,125), False, WAYPOINTS, PATH_WIDTH-20)
 
-        # Pebbles
+        # Smooth waypoint corners with multiple layers
+        for wp in WAYPOINTS:
+            pygame.draw.circle(s, (55,42,28), wp, PATH_WIDTH//2+7)
+            pygame.draw.circle(s, (75,60,40), wp, PATH_WIDTH//2+4)
+            pygame.draw.circle(s, PATH_COLOR, wp, PATH_WIDTH//2)
+            pygame.draw.circle(s, (155,135,110), wp, PATH_WIDTH//2-6)
+            pygame.draw.circle(s, (165,148,125), wp, PATH_WIDTH//2-10)
+
+        # Path pebbles and dirt texture
         for i in range(len(WAYPOINTS)-1):
             ax,ay = WAYPOINTS[i]; bx,by = WAYPOINTS[i+1]
             sl = math.sqrt((bx-ax)**2 + (by-ay)**2)
-            for j in range(int(sl/8)):
-                t = j / max(int(sl/8), 1)
-                px = int(ax+(bx-ax)*t+random.randint(-12,12))
-                py = int(ay+(by-ay)*t+random.randint(-12,12))
-                ps = random.randint(110,150)
-                pygame.draw.circle(s, (ps, ps-15, ps-30), (px,py), random.randint(1,3))
+            for j in range(int(sl/6)):
+                t = j / max(int(sl/6), 1)
+                px = int(ax+(bx-ax)*t+random.randint(-14,14))
+                py = int(ay+(by-ay)*t+random.randint(-14,14))
+                ps = random.randint(105,155)
+                sz = random.randint(1, 3)
+                pygame.draw.circle(s, (ps, ps-12, ps-28), (px,py), sz)
+
+        # Path edge grass (grass growing over path edges)
+        for i in range(len(WAYPOINTS)-1):
+            ax,ay = WAYPOINTS[i]; bx,by = WAYPOINTS[i+1]
+            sl = math.sqrt((bx-ax)**2 + (by-ay)**2)
+            dx, dy = bx-ax, by-ay
+            if sl == 0: continue
+            nx, ny = -dy/sl, dx/sl
+            for j in range(int(sl/10)):
+                t = j / max(int(sl/10), 1)
+                for side in [1, -1]:
+                    ex = int(ax + dx*t + nx*(PATH_WIDTH//2+3)*side + random.randint(-3,3))
+                    ey = int(ay + dy*t + ny*(PATH_WIDTH//2+3)*side + random.randint(-3,3))
+                    gc = (25+random.randint(0,15), 95+random.randint(0,40), 20)
+                    bh = random.randint(3, 8)
+                    pygame.draw.line(s, gc, (ex, ey), (ex+random.randint(-2,2), ey-bh*side*0.3-bh*0.7), 1)
 
         random.seed()
         return s
