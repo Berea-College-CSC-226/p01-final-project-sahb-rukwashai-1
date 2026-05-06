@@ -233,9 +233,6 @@ to stop waves of enemies from reaching the exit, built with Pygame.`
 | run(): main game loop | Pygame |
   - **Branches**: This project will **require** effective use of git. 
 
- Each partner should create a branch at the beginning of the project, and stay on this branch (or branches of their 
-branch) as they work. When you need to bring each others branches together, do so by merging each other's branches 
-into your own, following the process we've discussed in previous assignments, then re-branching out from the merged code.  
 
 ```
     Branch 1 starting name: sahb
@@ -248,11 +245,6 @@ into your own, following the process we've discussed in previous assignments, th
 ```
 
 ### References 
-
-Throughout this project, you will likely use outside resources. Reference all ideas which are not your own, 
-and describe how you integrated the ideas or code into your program. This includes online sources, people who have 
-helped you, AI tools you've used, and any other resources that are not solely your own contribution. Update this 
-section as you go. DO NOT forget about it!
     
 - Claude AI -helping write game logic for tower placement, enemy movement, wave spawning,
   and projectile systems.
@@ -303,14 +295,8 @@ What has surprised you so far? Describe your general feelings. Be honest with yo
 ## Milestone 3: Virtual Check-In
 Indicate what percentage of the project you have left to complete and how confident you feel. 
 
-**Completion Percentage**: `0 - 100%`
-
-**Confidence**: Describe how confident you feel about completing this project, and why. Then, describe some 
-  strategies you can employ to increase the likelihood that you'll be successful in completing this project 
-  before the deadline.
-
 ```
-    Completion Percentage: 90%
+**Completion Percentage**: 90%
 
 The core game is fully functional. Towers place and shoot, enemies walk the path and take
 damage, waves spawn with increasing difficulty, freeze tower slows enemies, bomb tower does
@@ -361,6 +347,13 @@ All known bugs and limitations are documented in the GitHub issue queue. The key
 - No start menu screen. The game loads directly into gameplay.
 - Window size is fixed and cannot be resized.
 - No save system for high scores.
+
+  Constraints:
+* Requires Python 3.10 or higher.
+* Requires pygame-ce installed (pip install pygame-ce). Regular pygame does not work with Python 3.13+.
+* All seven Python files must be in the same directory for imports to work.
+* Game window is fixed at 1200x700 pixels. Monitor must support at least that resolution.
+* No external image, sound, or data files are used. Everything is generated with code.
 
 ### Reflection
 
